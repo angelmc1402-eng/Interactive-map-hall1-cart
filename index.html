@@ -194,7 +194,7 @@
        SHOPIFY LINK — Mesa → Variante (Evey)
        Producto: ICONS 2026 - Vendor Registration (TCG / Sports Cards / Manga - Comics)
        ============================================================ */
-    const STORE_URL = 'https://frikimonkey.myshopify.com'; // fallback si el mapa se abre fuera del iframe
+    const STORE_URL = 'https://frikimonkey.com'; // fallback si el mapa se abre fuera del iframe
     const PRODUCT_HANDLE = 'icons-26-vendor-pass';
 
     const VARIANT_MAP = {
@@ -239,6 +239,12 @@
         m.classList.add('seleccionada');
         setTimeout(() => m.classList.remove('seleccionada'), 1500);
 
+        // Datos que necesita el wizard del theme (wiz-card / cat-card / wiz-pill / seat-select)
+        const typeLabel = v.esComercial ? 'Commercial Tables' : 'Collector Tables';
+        const catCode = v.cat === 'TCG' ? 'TCG' : (v.cat === 'SPORT CARDS' ? 'SPORT' : 'MANGA');
+        const pill = v.esEsquina ? 'Mesas Dobles (Esquinas)' : ('Zona ' + v.zone);
+        const seat = v.esEsquina ? info : (info.split('-')[2] || '').trim();
+
         const payload = {
             type: 'icons-map:select',
             mesa: info,
@@ -246,7 +252,10 @@
             handle: PRODUCT_HANDLE,
             corner: v.esEsquina,
             commercial: v.esComercial,
-            category: v.cat,
+            category: catCode,
+            typeLabel: typeLabel,
+            pill: pill,
+            seat: seat,
             zone: v.zone
         };
         if (window.parent !== window) {
