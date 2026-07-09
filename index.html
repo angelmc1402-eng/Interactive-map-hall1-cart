@@ -388,7 +388,7 @@
     // ZOOM & NAVIGATION ENGINE
     const container = document.getElementById('container');
     const mapImg = document.getElementById('map-img');
-    let currentZoomState = 0, baseScale = 1, currentScale = 1, currentX = 0, currentY = 0, isDragging = false, startX, startY, initialX, initialY;
+    let currentZoomState = 0, baseScale = 1, currentScale = 1, currentX = 0, currentY = 0, isDragging = false, dragMoved = false, startX, startY, initialX, initialY;
 
     function initMapPosition() {
         if(mapImg.naturalWidth === 0) { setTimeout(initMapPosition, 100); return; }
@@ -435,7 +435,7 @@
     }
 
     container.addEventListener('click', (e) => {
-        if (e.target.closest('a') || isDragging) return;
+        if (e.target.closest('a') || dragMoved) return; // solo bloquea si hubo arrastre real (>5px)
         // Click on an available table (zoomed in) → select variant in Shopify instead of zooming
         const mesa = e.target.closest('.mesa');
         if (mesa && currentZoomState > 0 && !mesa.classList.contains('agotada')) { seleccionarMesa(mesa); return; }
@@ -443,8 +443,8 @@
     });
     window.setZoomStateUI = function(state, event) { if (event) event.stopPropagation(); document.getElementById('loupe').classList.remove('visible'); setZoomState(state, null, null); };
 
-    function startDrag(clientX, clientY) { if (currentZoomState === 0) return; isDragging = true; startX = clientX; startY = clientY; initialX = currentX; initialY = currentY; container.style.transition = 'none'; }
-    function doDrag(clientX, clientY) { if (!isDragging) return; currentX = initialX + (clientX - startX); currentY = initialY + (clientY - startY); container.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentScale})`; }
+    function startDrag(clientX, clientY) { if (currentZoomState === 0) return; isDragging = true; dragMoved = false; startX = clientX; startY = clientY; initialX = currentX; initialY = currentY; container.style.transition = 'none'; }
+    function doDrag(clientX, clientY) { if (!isDragging) return; if (Math.abs(clientX - startX) > 5 || Math.abs(clientY - startY) > 5) dragMoved = true; currentX = initialX + (clientX - startX); currentY = initialY + (clientY - startY); container.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentScale})`; }
     function endDrag() { if (!isDragging) return; setTimeout(() => isDragging = false, 50); container.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)'; }
 
     container.addEventListener('mousedown', (e) => { if (e.target.closest('.sponsor-tooltip')) return; startDrag(e.clientX, e.clientY); });
